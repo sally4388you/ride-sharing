@@ -1,7 +1,6 @@
 package Model;
 
 import org.apache.commons.lang3.StringUtils;
-
 import java.util.*;
 
 /**
@@ -10,7 +9,7 @@ import java.util.*;
  * author: Sally Qi
  * date: 2019/05/12
  */
-public class Solution
+public class Solution implements Cloneable
 {
     private Set<Integer> S;
     private Map<Integer, Set<Integer>> sigma;
@@ -32,17 +31,8 @@ public class Solution
         return sigma;
     }
 
-    public void setS(Set<Integer> s) {
-        this.S = new HashSet<>();
-        S.addAll(s);
-    }
-
-    public void setSigma(Map<Integer, Set<Integer>> sigma) {
-        this.sigma = new HashMap<>();
-        this.sigma.putAll(sigma);
-    }
-
-    public Set<Integer> getSigmaAsSet() {
+    public Set<Integer> getAllPassengers()
+    {
         Set<Integer> result = new HashSet<>();
         for (Set<Integer> set : sigma.values()) {
             result.addAll(set);
@@ -58,42 +48,44 @@ public class Solution
         this.S.remove(driver);
     }
 
-    public void addPassengersToADriver(int labelId, Set<Integer> S) {
-        Set<Integer> set = new HashSet<>(S);
-        if (sigma.containsKey(labelId)) {
-            set.addAll(sigma.get(labelId));
+    public void addPassengersToADriver(int label, Set<Integer> S)
+    {
+        if (!sigma.containsKey(label)) {
+            Set<Integer> set = new HashSet<>();
+            sigma.put(label, set);
         }
-        this.sigma.put(labelId, set);
+
+        sigma.get(label).addAll(S);
     }
 
     /**
      * Add an element to σ(tripId)
      *
-     * @param tripId trip id
+     * @param driver trip id
      * @param passenger passenger id
      */
-    public void addPassengerToADriver(int tripId, int passenger)
+    public void addPassengerToADriver(int driver, int passenger)
     {
-        Set<Integer> set = (sigma.containsKey(tripId)) ? sigma.get(tripId) : new HashSet<>();
+        Set<Integer> set = (sigma.containsKey(driver)) ? sigma.get(driver) : new HashSet<>();
         set.add(passenger);
 
-        this.sigma.put(tripId, set);
+        this.sigma.put(driver, set);
     }
 
     /**
      * Remove an element from σ(tripId)
      *
-     * @param tripId trip id
+     * @param driver trip id
      * @param passenger passenger id
      */
-    public void removePassengerFromDriver(int tripId, int passenger)
+    public void removePassengerFromDriver(int driver, int passenger)
     {
-        if (!sigma.containsKey(tripId)) return ;
+        if (!sigma.containsKey(driver)) return ;
 
-        Set<Integer> set = sigma.get(tripId);
+        Set<Integer> set = sigma.get(driver);
         set.remove(passenger);
 
-        this.sigma.put(tripId, set);
+        this.sigma.put(driver, set);
     }
 
     /**
@@ -137,5 +129,25 @@ public class Solution
             System.out.print(StringUtils.join(this.sigma.get(i), ", "));
             System.out.print(")\n");
         }
+    }
+
+    /**
+     * Print solution only with its id
+     */
+    public void printSimple()
+    {
+        System.out.println("Solution:\n");
+        System.out.println("Driver Set:" + this.S.toString());
+        System.out.println("Passenger Set: {");
+        for (int i: this.sigma.keySet()) {
+            System.out.println("\t" + i + ": " + this.sigma.get(i).toString());
+        }
+        System.out.println("}");
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException
+    {
+        return super.clone();
     }
 }

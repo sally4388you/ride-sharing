@@ -1,6 +1,7 @@
 package Model;
 
 import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultEdge;
 
 import java.util.ArrayList;
 
@@ -12,11 +13,11 @@ import java.util.ArrayList;
  */
 public abstract class Algorithm implements BaseAlgorithm
 {
-    protected Graph graph; // INPUT: a road network G
+    protected Graph<Integer, DefaultEdge> graph; // INPUT: a road network G
     protected ArrayList<Vertex> trips; // INPUT: a set of trips R
     protected Solution solution; // OUTPUT: a solution (S, σ)
 
-    public Algorithm(Graph graph, ArrayList<Vertex> trips)
+    public Algorithm(Graph<Integer, DefaultEdge> graph, ArrayList<Vertex> trips)
     {
         this.graph = graph;
         this.trips = trips;

@@ -2,6 +2,7 @@ package Controller;
 
 import Model.*;
 import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.DepthFirstIterator;
 
 import java.awt.*;
@@ -15,7 +16,6 @@ import java.util.*;
  */
 public class RFP extends Algorithm
 {
-    private int[] capacity;
     private Set<Integer> SF;
     private Map<Point, Integer> gap;
 
@@ -25,12 +25,11 @@ public class RFP extends Algorithm
      * @param graph A simple directed graph
      * @param trips A set of trips
      */
-    public RFP(Graph graph, ArrayList<Vertex> trips)
+    public RFP(Graph<Integer, DefaultEdge> graph, ArrayList<Vertex> trips)
     {
         super(graph, trips);
         this.gap = new HashMap<>();
         this.SF = new HashSet<>();
-        this.capacity = this.setCapacity(trips);
     }
 
     /**
@@ -44,7 +43,7 @@ public class RFP extends Algorithm
         int k;
 
         // find the first vertex for DFS traversal
-        int start = (int) this.graph.vertexSet().iterator().next();
+        int start = this.graph.vertexSet().iterator().next();
         Iterator<Integer> iterator = new DepthFirstIterator<>(this.graph, start);
 
         // LINE 2: for i = 2 to l do
@@ -65,7 +64,7 @@ public class RFP extends Algorithm
             computeSF();
             // LINE 3: k := Find-Target(i);
             k = findTarget(i);
-            // LINE 4: while k!= 0 do /*serve σ(k) by drivers in SF and removek from S*/
+            // LINE 4: while k!= 0 do /* serve σ(k) by drivers in SF and removek from S */
             while (k != 0) {
                 for (int j : SF) {
                     // LINE 5: for each j ∈ SF, k < j < i do
@@ -126,7 +125,7 @@ public class RFP extends Algorithm
      */
     private int free(int id)
     {
-        int capacity = this.capacity[id];
+        int capacity = this.trips.get(id).getTrip().getCapacity();
         return capacity - solution.lengthOfSigma(id) + 1;
     }
 
@@ -175,20 +174,5 @@ public class RFP extends Algorithm
 
         // LINE 3: if free(i) >= gap(i,k) then return k else return 0;
         return free(i) >= min ? k : 0;
-    }
-
-    /**
-     * Retrieve capacity information from the original trips
-     *
-     * @param trips original trips data
-     * @return array [trip index => capacity]
-     */
-    private int[] setCapacity(ArrayList<Vertex> trips)
-    {
-        int[] capacity = new int[trips.size()];
-
-        trips.forEach(trip -> capacity[trip.getId()] = trip.getTrip().getCapacity());
-
-        return capacity;
     }
 }

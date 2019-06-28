@@ -59,7 +59,7 @@ public class Trip
     @CsvBindByName(column = "trippath")
     private String path;
     @CsvBindByName(column = "triplength")
-    private Double length;
+    private float length;
 
     public long getId() {
         return id;
@@ -146,11 +146,19 @@ public class Trip
         return new JSONArray(path);
     }
 
-    public Double getLength() {
+    public float getLength() {
         return length;
     }
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public Trip setTestData(long id, int capacity, float length)
+    {
+        this.id = id;
+        this.capacity = capacity;
+        this.length = length;
+        return this;
     }
 }

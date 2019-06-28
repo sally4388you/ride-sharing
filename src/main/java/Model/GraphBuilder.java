@@ -22,9 +22,9 @@ public class GraphBuilder
 {
     private ArrayList<Vertex> vertices; // map original trips data to an array of vertex
     private Map<Point2D.Double, Set<Integer>> vertices_tmp; // a temporary variable to help build the graph
-    private Vertex destination; // destination vertex
+//    private Vertex destination; // destination vertex
 
-    /**
+    /**∂
      * @return an array of vertex that contains information of trip and its id
      */
     public ArrayList<Vertex> getVertices() {
@@ -41,6 +41,7 @@ public class GraphBuilder
     {
         FileReader reader = new FileReader(new File(url).getAbsolutePath());
 
+        @SuppressWarnings("unchecked")
         List<Trip> trips = new CsvToBeanBuilder(reader).withType(Trip.class).build().parse();
 
         Point2D.Double destination = null;
@@ -65,7 +66,7 @@ public class GraphBuilder
             String sourceLng = trip.getMapStartLng();
 
             Point2D.Double source = new Point2D.Double(Double.valueOf(sourceLng), Double.valueOf(sourceLat));
-            Vertex vertex = new Vertex(total, source, trip);
+            Vertex vertex = new Vertex(total, trip);
 
             Set<Integer> set = this.vertices_tmp.containsKey(source) ? this.vertices_tmp.get(source) : new HashSet<>();
             set.add(total);
@@ -74,7 +75,7 @@ public class GraphBuilder
             this.vertices_tmp.put(source, set);
             total++;
         }
-        this.destination = new Vertex(total, destination, null);
+//        this.destination = new Vertex(total, destination, null);
 
     }
 
@@ -89,7 +90,7 @@ public class GraphBuilder
 
         Set<Integer> visited = new HashSet<>();
 
-        Map<Double, Integer> sortGraphByLength = new TreeMap<>(Collections.reverseOrder());
+        Map<Float, Integer> sortGraphByLength = new TreeMap<>(Collections.reverseOrder());
 
         // partitioned into same group if having same source
         this.vertices.forEach(
@@ -142,8 +143,8 @@ public class GraphBuilder
             }
 
             // add an edge between the current trip and its destination
-            graph.addVertex(this.destination.getId());
-            graph.addEdge(last_vertex, this.destination.getId());
+//            graph.addVertex(this.destination.getId());
+//            graph.addEdge(last_vertex, this.destination.getId());
         }
 
         return graph;
