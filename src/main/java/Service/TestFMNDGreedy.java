@@ -1,7 +1,6 @@
 package Service;
 
-import Controller.FMCS;
-import Model.GraphBuilder;
+import Controller.FMNDGreedy;
 import Model.Solution;
 import Model.Trip;
 import Model.Vertex;
@@ -12,19 +11,9 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Application {
+public class TestFMNDGreedy {
 
     public static void main(String[] args) throws Exception {
-
-        // 1. generate new csv file
-//        Trip.generateFromCSVFile();
-//        Trip.generateSinglePath(47.447767,-122.243275,49.28381,-123.12, 8, 0, null, 0);
-
-        // 3. algorithm FMCS with given data
-//        GraphBuilder g = new GraphBuilder("src/main/resources/modified/RTripSingle.csv");
-//        FMCS algorithm = new FMCS(g.getSimpleDirectedGraph(), g.getVertices());
-//        Solution solution = algorithm.getSolution();
-//        solution.print(g.getVertices());
 
         // 4. algorithm FMCS with examples in the paper
         Graph<Integer, DefaultEdge> graph = new SimpleDirectedGraph<>(DefaultEdge.class);
@@ -55,7 +44,7 @@ public class Application {
         graph.addEdge(5, 1);
 
 
-        FMCS algorithm = new FMCS(graph, vertices);
+        FMNDGreedy algorithm = new FMNDGreedy(graph, vertices);
         Solution solution = algorithm.getSolution();
         solution.printSimple();
     }

@@ -622,6 +622,10 @@ public class FMCS extends Algorithm
         return solutions;
     }
 
+    /**
+     * Translate from labels to real trips for a specific solution
+     * @param solution calculated solution
+     */
     private void translateFromLabelToRealTrip(Solution solution)
     {
         for (int i: solution.getS()) {
