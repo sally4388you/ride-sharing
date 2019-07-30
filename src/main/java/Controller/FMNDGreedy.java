@@ -37,36 +37,51 @@ public class FMNDGreedy extends Algorithm
      */
     private void setSolution()
     {
+        // LINE 1: S:={};
         Set<Integer> visited = new HashSet<>();
+        // LINE 2: for every trip v ∈ At do
         for (int source : this.sources) {
             int x = source;
             Set<Integer> ancestors = getAncestors(x);
+            // LINE 3: while (x ∈ At) or (all trips in Ax\{x} are marked) do
             while (x == source || areMarked(ancestors, visited)) {
                 ancestors.retainAll(this.solution.getS());
+                // LINE 4: let u be a trip in Ax\S with the largest nu;
                 int u = ancestors.iterator().next();
+                // LINE 5: if u != x, then
                 if (u != x) {
                     int k = 0;
                     for (int driver : this.solution.getS()) {
+                        // LINE 6: let k ∈ S s.t. u ∈ σ(k);
                         if (this.solution.getSigma().get(driver).contains(u)) {
                             k = driver;
                             break;
                         }
                     }
                     if (k != 0) {
+                        // LINE 6: σ(k) := (σ(k)\{u}) U {x}
                         this.solution.removePassengerFromDriver(k, u);
                         this.solution.addPassengerToADriver(k, x);
+                        // LINE 6: mark x;
                         visited.add(x);
                     }
                 }
                 Set<Integer> descendantWithoutAtSigma = descendants(u);
+                // LINE 8: c := min{nu + 1, |Du\σ(S)|};
                 int c = getC(u, descendantWithoutAtSigma);
+                // LINE 8: S := S U {u};
                 this.solution.addDriverToS(u);
+                // LINE 9: σ(u) := N(u,c,S)
                 solution.addPassengersToADriver(u, N(u, c, descendantWithoutAtSigma));
+                // LINE 9: mark all trips in σ(u);
                 visited.addAll(this.solution.getSigma().get(u));
+                // LINE 9: if (all trips in Du are marked) then
                 if (areMarked(descendantWithoutAtSigma, visited)) {
+                    // LINE 10: break the while loop;
                     break;
                 } else {
-                    x = 1;
+                    // LINE 12: let x be the unmarked trip in Du with the minimum dist(u->x) in T;
+                    x = minDist(u);
                 }
 
             }
