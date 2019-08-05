@@ -106,14 +106,6 @@ public class FMNDGreedy extends Algorithm
         this.translateFromLabelToRealTrip();
     }
 
-    private float dist(int source, int target)
-    {
-        float lengthSource = this.trips.get(this.labels[source]).getTrip().getLength();
-        float lengthTarget = this.trips.get(this.labels[target]).getTrip().getLength();
-
-        return lengthTarget - lengthSource;
-    }
-
     /**
      * Get solution from parent if the solution has been set
      * Otherwise compute solution
@@ -214,6 +206,12 @@ public class FMNDGreedy extends Algorithm
         return u;
     }
 
+    /**
+     * Get a set of all the ancestors of a vertex and the vertex itself
+     *
+     * @param child_label label of a vertex
+     * @return a set of a vertex and its ancestors
+     */
     private Set<Integer> getAncestors(int child_label)
     {
         Set<Integer> ancestors = new HashSet<>();
@@ -238,6 +236,14 @@ public class FMNDGreedy extends Algorithm
         return ancestors;
     }
 
+    /**
+     * Check if a set of vertices have been visited or not
+     *
+     * @param visited a set of visited vertices
+     * @param setToCheck a set of vertices that need to be checked
+     * @param excludeElement an element that needs to excluded from the checking
+     * @return boolean
+     */
     private boolean areMarked(Set<Integer> visited, Set<Integer> setToCheck, int excludeElement)
     {
         Set<Integer> setToCheck_copy = new HashSet<>(setToCheck);
@@ -247,6 +253,13 @@ public class FMNDGreedy extends Algorithm
         return setToCheck_copy.size() == 0;
     }
 
+    /**
+     * Retrieve a set of descendants of a label
+     * A set of descendants include itself
+     *
+     * @param label new label id
+     * @return a set of label id
+     */
     private Set<Integer> descendants(int label, boolean withoutSigma)
     {
         Set<Integer> sigma;
@@ -287,6 +300,13 @@ public class FMNDGreedy extends Algorithm
         return result;
     }
 
+    /**
+     * c := min{ni + 1, |Di\σ(S)|}
+     *
+     * @param label label
+     * @param descendantWithoutAtSigma Di\σ(S
+     * @return int
+     */
     private int getC(int label, Set<Integer> descendantWithoutAtSigma)
     {
         int n = this.trips.get(this.labels[label]).getTrip().getCapacity();
@@ -294,6 +314,12 @@ public class FMNDGreedy extends Algorithm
         return Math.min(n + 1, descendantWithoutAtSigma.size());
     }
 
+    /**
+     * @param i label id
+     * @param c minimum number
+     * @param descendantWithoutAtSigma Di
+     * @return N(i, c, S)
+     */
     private Set<Integer> N(int i, int c, Set<Integer> descendantWithoutAtSigma)
     {
         Set<Integer> result = new HashSet<>();
@@ -311,6 +337,23 @@ public class FMNDGreedy extends Algorithm
         return result;
     }
 
+    /**
+     * Calculate the distance from a vertex to another vertex
+     * @param source a vertex
+     * @param target a vertex
+     * @return the distance between the two vertices
+     */
+    private float dist(int source, int target)
+    {
+        float lengthSource = this.trips.get(this.labels[source]).getTrip().getLength();
+        float lengthTarget = this.trips.get(this.labels[target]).getTrip().getLength();
+
+        return lengthTarget - lengthSource;
+    }
+
+    /**
+     * Translate from labels to real trips for a specific solution
+     */
     private void translateFromLabelToRealTrip()
     {
         Solution translatedSolution = new Solution();
