@@ -27,7 +27,8 @@ public class FMNDGreedy extends Algorithm
     {
         super(graph, trips);
 
-        this.sources = new TreeSet<>();
+        // for implementing purpose, reversed the order of the origins
+        this.sources = new TreeSet<>(Collections.reverseOrder());
         this.labels = this.setLabels();
     }
 
@@ -37,20 +38,28 @@ public class FMNDGreedy extends Algorithm
      */
     private void setSolution()
     {
-        // LINE 1: S:={};
         Set<Integer> visited = new HashSet<>();
+        // for implementing purpose, reversed the order of the origins
         // LINE 2: for every trip v ∈ At do
         for (int source : this.sources) {
             int x = source;
-            Set<Integer> ancestors = getAncestors(x);
             // LINE 3: while (x ∈ At) or (all trips in Ax\{x} are marked) do
-            while (x == source || areMarked(ancestors, visited)) {
-                ancestors.retainAll(this.solution.getS());
+            while (x == source || areMarked(visited, getAncestors(x), x)) {
+                Set<Integer> ancestors = getAncestors(x);
+                ancestors.removeAll(this.solution.getS());
+                int largestCapacity = 0;
+                int u = -1;
                 // LINE 4: let u be a trip in Ax\S with the largest nu;
-                int u = ancestors.iterator().next();
+                for (int tmp: ancestors) {
+                    int thisCapacity = this.trips.get(this.labels[tmp]).getTrip().getCapacity();
+                    if (thisCapacity > largestCapacity) {
+                        largestCapacity = thisCapacity;
+                        u = tmp;
+                    }
+                }
                 // LINE 5: if u != x, then
-                if (u != x) {
-                    int k = 0;
+                if (u != -1 && u != x) {
+                    int k = -1;
                     for (int driver : this.solution.getS()) {
                         // LINE 6: let k ∈ S s.t. u ∈ σ(k);
                         if (this.solution.getSigma().get(driver).contains(u)) {
@@ -58,7 +67,7 @@ public class FMNDGreedy extends Algorithm
                             break;
                         }
                     }
-                    if (k != 0) {
+                    if (k != -1) {
                         // LINE 6: σ(k) := (σ(k)\{u}) U {x}
                         this.solution.removePassengerFromDriver(k, u);
                         this.solution.addPassengerToADriver(k, x);
@@ -66,7 +75,7 @@ public class FMNDGreedy extends Algorithm
                         visited.add(x);
                     }
                 }
-                Set<Integer> descendantWithoutAtSigma = descendants(u);
+                Set<Integer> descendantWithoutAtSigma = descendants(u, true);
                 // LINE 8: c := min{nu + 1, |Du\σ(S)|};
                 int c = getC(u, descendantWithoutAtSigma);
                 // LINE 8: S := S U {u};
@@ -76,16 +85,33 @@ public class FMNDGreedy extends Algorithm
                 // LINE 9: mark all trips in σ(u);
                 visited.addAll(this.solution.getSigma().get(u));
                 // LINE 9: if (all trips in Du are marked) then
-                if (areMarked(descendantWithoutAtSigma, visited)) {
+                Set<Integer> descendantsSet = descendants(u, false);
+                if (areMarked(visited, descendantsSet, -1)) {
                     // LINE 10: break the while loop;
                     break;
                 } else {
                     // LINE 12: let x be the unmarked trip in Du with the minimum dist(u->x) in T;
-                    x = minDist(u);
+                    descendantsSet.removeAll(visited);
+                    float minDistance = -1;
+                    for (int tmp: descendantsSet) {
+                        float thisDistance = this.dist(u, x);
+                        if (minDistance == -1 || thisDistance < minDistance) {
+                            minDistance = thisDistance;
+                            x = tmp;
+                        }
+                    }
                 }
-
             }
         }
+        this.translateFromLabelToRealTrip();
+    }
+
+    private float dist(int source, int target)
+    {
+        float lengthSource = this.trips.get(this.labels[source]).getTrip().getLength();
+        float lengthTarget = this.trips.get(this.labels[target]).getTrip().getLength();
+
+        return lengthTarget - lengthSource;
     }
 
     /**
@@ -188,26 +214,51 @@ public class FMNDGreedy extends Algorithm
         return u;
     }
 
-    // TODO:: sort
-    private Set<Integer> getAncestors(int x)
+    private Set<Integer> getAncestors(int child_label)
     {
-        return null;
+        Set<Integer> ancestors = new HashSet<>();
+        ancestors.add(child_label);
+
+        // find its outgoing edges
+        int u = this.labels[child_label];
+        DefaultEdge edge;
+        Set<DefaultEdge> e = this.graph.incomingEdgesOf(u);
+
+        // use DFS to find the deepest vertex
+        while (!e.isEmpty()) {
+            edge = e.iterator().next();
+            // update vertex u
+            u = this.graph.getEdgeSource(edge);
+            // update the set of ancestors
+            ancestors.add(ArrayUtils.indexOf(this.labels, u));
+            // update set of edges e
+            e = this.graph.incomingEdgesOf(u);
+        }
+
+        return ancestors;
     }
 
-    private boolean areMarked(Set<Integer> check, Set<Integer> visited)
+    private boolean areMarked(Set<Integer> visited, Set<Integer> setToCheck, int excludeElement)
     {
-        return false;
+        Set<Integer> setToCheck_copy = new HashSet<>(setToCheck);
+        setToCheck_copy.remove(excludeElement);
+        setToCheck_copy.removeAll(visited);
+
+        return setToCheck_copy.size() == 0;
     }
 
-    private Set<Integer> descendants(int label)
+    private Set<Integer> descendants(int label, boolean withoutSigma)
     {
         Set<Integer> sigma;
         Set<Integer> sigma_origin = new HashSet<>();
 
         // IF TRUE: exclude trips that are in the solution
-        sigma = this.solution.getAllPassengers();
-        // change all label id to original id to get graph information
-        for (int i : sigma) sigma_origin.add(this.labels[i]);
+        // ELSE: sigma_origin is empty
+        if (withoutSigma) {
+            sigma = this.solution.getAllPassengers();
+            // change all label id to original id to get graph information
+            for (int i : sigma) sigma_origin.add(this.labels[i]);
+        }
 
         Set<Integer> result = new HashSet<>();
 
@@ -258,5 +309,23 @@ public class FMNDGreedy extends Algorithm
             result.add(it.next());
         }
         return result;
+    }
+
+    private void translateFromLabelToRealTrip()
+    {
+        Solution translatedSolution = new Solution();
+
+        for (int i: this.solution.getS()) {
+            translatedSolution.addDriverToS(this.labels[i]);
+        }
+
+        for (int i: this.solution.getSigma().keySet()) {
+            Set<Integer> passengers = new HashSet<>();
+            for (int j: this.solution.getSigma().get(i)) {
+                passengers.add(this.labels[j]);
+            }
+            translatedSolution.addPassengersToADriver(this.labels[i], passengers);
+        }
+        this.solution = translatedSolution;
     }
 }
