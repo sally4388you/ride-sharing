@@ -61,6 +61,27 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>RFP</id>
+            <properties>
+                <spring.boot.mainclass>Service.TestRFP</spring.boot.mainclass>
+            </properties>
+        </profile>
+        <profile>
+            <id>FMCS</id>
+            <properties>
+                <spring.boot.mainclass>Service.TestFMCS</spring.boot.mainclass>
+            </properties>
+        </profile>
+        <profile>
+            <id>FMNDGreedy</id>
+            <properties>
+                <spring.boot.mainclass>Service.TestFMNDGreedy</spring.boot.mainclass>
+            </properties>
+        </profile>
+    </profiles>
+
     <properties>
         <java.version>1.8</java.version>
     </properties>
