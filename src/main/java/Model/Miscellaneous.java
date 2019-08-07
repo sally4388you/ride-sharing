@@ -5,8 +5,10 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import org.json.JSONArray;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -20,9 +22,12 @@ public class Miscellaneous
      * @throws Exception throw file not found exception
      */
     static public void generateFromCSVFile() throws Exception {
+        String home_dir = System.getProperty("user.dir");
 
-        String readUrl = "/Users/sally/code/IdeaProjects/ridesharing/src/main/resources/origin/SampleData.csv";
-        String writeUrl = "/Users/sally/code/IdeaProjects/ridesharing/src/main/resources/modified/RTrip2.csv";
+        String readUrl = home_dir + "/src/main/resources/origin/SampleData.csv";
+        String writeUrl = home_dir + "/src/main/resources/modified/RTrip2.csv";
+
+        System.out.println(readUrl);
 
         CSVReader reader = new CSVReader(new FileReader(readUrl));
         CSVWriter writer = new CSVWriter(new FileWriter(writeUrl), ',');
@@ -77,8 +82,8 @@ public class Miscellaneous
     static public void generateSinglePath(double startLat, double startLng, double endLat, double endLng, int amount,
                                           int intersection, JSONArray pathPlus, int startFrom) throws Exception {
 
-        String writeUrl = "/Users/sally/code/IdeaProjects/ridesharing/src/main/resources/modified/RTripSingle" +
-                ".csv";
+        String home_dir = System.getProperty("user.dir");
+        String writeUrl = home_dir + "/src/main/resources/modified/RTripSingle.csv";
 
         CSVWriter writer = new CSVWriter(new FileWriter(writeUrl, true), ',');
 

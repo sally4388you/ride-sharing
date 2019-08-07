@@ -3,10 +3,7 @@ package Service;
 import Controller.FMCS;
 import Controller.FMNDGreedy;
 import Controller.RFP;
-import Model.GraphBuilder;
-import Model.Solution;
-import Model.Trip;
-import Model.Vertex;
+import Model.*;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -22,9 +19,14 @@ public class TestCases
 //        testRFP();
 //        testFMCS();
 //        testFMNDGreedy();
-        testFMCSWithFile();
+//        testFMCSWithFile();
+        testMiscellaneous();
     }
 
+    /**
+     * Test RFP algorithm with a simple path
+     * @throws FileNotFoundException throw error if data is missing
+     */
     static private void testRFP() throws FileNotFoundException
     {
         GraphBuilder g = new GraphBuilder("src/main/resources/modified/RTripSingle.csv");
@@ -33,6 +35,9 @@ public class TestCases
         solution.print(g.getVertices());
     }
 
+    /**
+     * Test dynamic programming algorithm with the example in the paper
+     */
     static private void testFMCS()
     {
         Graph<Integer, DefaultEdge> graph = exampleFromPaper();
@@ -42,6 +47,9 @@ public class TestCases
         solution.printSimple();
     }
 
+    /**
+     * Test the greedy algorithm with the example in the paper
+     */
     static private void testFMNDGreedy()
     {
         Graph<Integer, DefaultEdge> graph = exampleFromPaper();
@@ -51,6 +59,10 @@ public class TestCases
         solution.printSimple();
     }
 
+    /**
+     * Test dynamic programming algoirthm with a simple path
+     * @throws FileNotFoundException throw error if data is missing
+     */
     static private void testFMCSWithFile() throws FileNotFoundException
     {
         GraphBuilder g = new GraphBuilder("src/main/resources/modified/RTripSingle.csv");
@@ -59,6 +71,10 @@ public class TestCases
         solution.print(g.getVertices());
     }
 
+    /**
+     * Build a graph for the example in the paper
+     * @return graph
+     */
     static private Graph<Integer, DefaultEdge> exampleFromPaper()
     {
         Graph<Integer, DefaultEdge> graph = new SimpleDirectedGraph<>(DefaultEdge.class);
@@ -81,6 +97,10 @@ public class TestCases
         return graph;
     }
 
+    /**
+     * Build vertices from the example in the paper
+     * @return a list of vertices
+     */
     static private ArrayList<Vertex> vertexExampleFromPaper()
     {
         ArrayList<Vertex> vertices = new ArrayList<>(Collections.nCopies(8, null));
@@ -94,5 +114,17 @@ public class TestCases
         vertices.set(7, new Vertex(7, new Trip().setTestData(7, 1, 5)));
 
         return vertices;
+    }
+
+    /**
+     * Test dataset generating functionality
+     * @throws Exception throw error if writing files fails
+     */
+    static private void testMiscellaneous() throws Exception
+    {
+        // Test generate a standard csv file from a given dataset
+//        Miscellaneous.generateFromCSVFile();
+        // Test generate a standard csv file given coordinates of a source and a destination
+        Miscellaneous.generateSinglePath(47.447767,-122.243275,49.28381,-123.12, 8, 0, null, 0);
     }
 }
