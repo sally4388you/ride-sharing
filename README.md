@@ -1,6 +1,6 @@
-This project is a implementation of three algorithms that solves minimization problems of ridesharing.
+This project is a implementation of three algorithms that solve minimization problems of ridesharing.
 
-The following is a list of algorithms that have been implemented in thi sproject.
+The following is a list of algorithms that have been implemented in this sproject.
 * RFP algorithm from paper [Algorithmic analysis for ridesharing of personal vehicles](https://www.sciencedirect.com/science/article/pii/S030439751730628X).
 * Dynamic programming algorithm from paper [Efficient Algorithms for Ridesharing of Personal Vehicles](https://link.springer.com/chapter/10.1007/978-3-319-71150-8_29).
 * Greedy algorithm from paper [Efficient Algorithms for Ridesharing of Personal Vehicles](https://link.springer.com/chapter/10.1007/978-3-319-71150-8_29).
