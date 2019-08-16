@@ -16,11 +16,11 @@ public class TestCases
 {
     public static void main(String[] args) throws Exception
     {
-//        testRFP();
+        testRFP();
 //        testFMCS();
 //        testFMNDGreedy();
 //        testFMCSWithFile();
-        testMiscellaneous();
+//        testMiscellaneous();
     }
 
     /**

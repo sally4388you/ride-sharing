@@ -18,6 +18,7 @@ public class RFP extends Algorithm
 {
     private Set<Integer> SF;
     private Map<Point, Integer> gap;
+    private Integer[] labels;
 
     /**
      * Set the graph and the trips for the algorithm
@@ -30,6 +31,7 @@ public class RFP extends Algorithm
         super(graph, trips);
         this.gap = new HashMap<>();
         this.SF = new HashSet<>();
+        this.labels = this.setLabels();
     }
 
     /**
@@ -39,7 +41,6 @@ public class RFP extends Algorithm
     private void setSolution()
     {
         // initialize necessary variables
-        int count = 0;
         int k;
 
         // find the first vertex for DFS traversal
@@ -47,17 +48,15 @@ public class RFP extends Algorithm
         Iterator<Integer> iterator = new DepthFirstIterator<>(this.graph, start);
 
         // LINE 2: for i = 2 to l do
-        while (iterator.hasNext()) {
-            int i = iterator.next();
-
-            // the graph contains a destination vertex which may not be in trips
-            if (i >= this.trips.size()) continue;
+        // the graph contains a destination vertex which may not be in trips
+        for (int i = 1; i < this.labels.length; i ++) {
+            if (this.labels[i] == -1) continue;
 
             // LINE 1: S := {1}; // LINE 3: S:= S U {i};
             solution.addDriverToS(i);
             // LINE 1: σ(1) := {1}; // LINE 3: w(i) := {i};
             solution.addPassengerToADriver(i, i);
-            if (count ++ == 0) continue;
+            if (i == 1) continue;
 
             // LINE 3: compute free(i) and SF;
             // start from the second vertex of trips
@@ -65,7 +64,7 @@ public class RFP extends Algorithm
             // LINE 3: k := Find-Target(i);
             k = findTarget(i);
             // LINE 4: while k!= 0 do /* serve σ(k) by drivers in SF and removek from S */
-            while (k != 0) {
+            while (k != -1) {
                 for (int j : SF) {
                     // LINE 5: for each j ∈ SF, k < j < i do
                     if (k < j && j <= i) {
@@ -95,9 +94,10 @@ public class RFP extends Algorithm
                 solution.removeDriverFromS(k);
                 computeSF();
                 // LINE 10: if free(i) >= 1 and |S| >= 2 then k := Find-Target(i);
-                k = (free(i) >= 1 && solution.lengthOfS() >= 2) ? findTarget(i) : 0;
+                k = (free(i) >= 1 && solution.lengthOfS() >= 2) ? findTarget(i) : -1;
             }
         }
+        this.translateFromLabelToRealTrip();
     }
 
     /**
@@ -120,13 +120,14 @@ public class RFP extends Algorithm
      * Implement free(i) in the algorithm
      * free(i) = n(i) - |σ(i)| + 1
      *
-     * @param id i
+     * @param label_id i
      * @return the number of additional trips i can serve
      */
-    private int free(int id)
+    private int free(int label_id)
     {
+        int id = this.labels[label_id];
         int capacity = this.trips.get(id).getTrip().getCapacity();
-        return capacity - solution.lengthOfSigma(id) + 1;
+        return capacity - solution.lengthOfSigma(label_id) + 1;
     }
 
     /**
@@ -151,8 +152,8 @@ public class RFP extends Algorithm
     private int findTarget(int i)
     {
         int free = 0;
-        int k = 0;
-        int min = 10;
+        int k = -1;
+        int min = -1;
         // LINE 1: for each j ∈ S \ {i} do
         for (int j : solution.getS()) {
             if (j == i) continue;
@@ -166,13 +167,65 @@ public class RFP extends Algorithm
             gap.put(index, solution.lengthOfSigma(j) - free);
 
             // LINE 2: Let k = min{gap(i,j)};
-            if (gap.get(index) < min) {
+            if (min == -1 || gap.get(index) < min) {
                 min = gap.get(index);
                 k = j;
             }
         }
 
         // LINE 3: if free(i) >= gap(i,k) then return k else return 0;
-        return free(i) >= min ? k : 0;
+        return free(i) >= min ? k : -1;
+    }
+
+    /**
+     * Procedure for assigning integer labels to trips in T.
+     */
+    private Integer[] setLabels()
+    {
+        // retrieve a vertex randomly
+        Integer[] labels = new Integer[this.trips.size() + 1];
+        Arrays.fill(labels, -1);
+
+        int i = this.graph.vertexSet().size();
+
+        int u = this.graph.vertexSet().iterator().next();
+        labels[i --] = u;
+
+        // find its outgoing edges
+        DefaultEdge edge;
+        Set<DefaultEdge> e = this.graph.outgoingEdgesOf(u);
+
+        // use DFS to find the deepest vertex
+        while (!e.isEmpty()) {
+            edge = e.iterator().next();
+            // update vertex u
+            u = this.graph.getEdgeTarget(edge);
+            labels[i --] = u;
+            // update set of edges e
+            e = this.graph.outgoingEdgesOf(u);
+        }
+
+        return labels;
+    }
+
+    /**
+     * Translate from labels to real trips for a specific solution
+     */
+    private void translateFromLabelToRealTrip()
+    {
+        Solution translatedSolution = new Solution();
+
+        for (int i: this.solution.getS()) {
+            translatedSolution.addDriverToS(this.labels[i]);
+        }
+
+        for (int i: this.solution.getSigma().keySet()) {
+            Set<Integer> passengers = new HashSet<>();
+            for (int j: this.solution.getSigma().get(i)) {
+                passengers.add(this.labels[j]);
+            }
+            translatedSolution.addPassengersToADriver(this.labels[i], passengers);
+        }
+        this.solution = translatedSolution;
     }
 }
